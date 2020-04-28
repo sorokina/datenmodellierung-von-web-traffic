@@ -24,6 +24,9 @@ print(df)
 
 
 
+
+
+
 -- TASK 2: Datenmodellierung: Erstelle Tabellen in SQL (postgres, mysql, mariadb) im Sternschema als Fakten- und Dimensionstabelle. Befülle sie, um damit die untenstehenden Fragen mit SQL zu beantworten.
 -- Tables are created in MYSQL
 
