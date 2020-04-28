@@ -54,6 +54,7 @@ GROUP BY 1,2
 ) as SUB
 
 where SUB.diff_in_sec>0
+
 *****
 
 AVG Session Duration for VARIANTS A and B:
@@ -75,17 +76,33 @@ GROUP BY 1
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 -- Ist in den Abendstunden mehr auf Preis.de los als in der Mittagszeit?
+
+#####
+Yes, the highest peak of user's activity (in accordance with data set given) is between 18:00 and 18:59.
+
+The distribution of activity (events per hour) looks like following: 
+
+hour   #events
+11	455
+12	446
+13	563
+14	453
+15	483
+16	505
+17	659
+18	736
+19	684
+20	659
+21	178
+22	98
+
+#####
+QUERY:
+
+SELECT
+FROM_UNIXTIME(Time1.time, '%H'),
+COUNT(*) FROM fact_main
+JOIN Time on Time.time_id=fact_main.time_id
+GROUP BY 1
+
