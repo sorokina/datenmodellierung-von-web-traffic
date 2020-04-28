@@ -1,5 +1,57 @@
 -- Wie viele *clickouts* werden pro session_id mit den unterschiedlichen devices erzeugt? Vergleiche die Gruppen A und B.
 
+#####
+
+Based on the Data Set there is only one Session (keea1bqaoaek8g1e7f3rpc8rh6) from group A where 2 different devices were used: Tablet for Clickout & Pageview and Desktop for Pageview Only
+
+In this case we can not compare two groups and answere the question given.
+
+Instead we can calculate Average  # Clickouts per Session for group A and B (regardless the device used):
+
+For Variant A AVG number of Clickouts per Session is 1,88
+For Variant B AVG NUmber of Clickouts per Session is 1,66
+
+Conclusion: The AVG number of Clickouts in Variant A is 13% bigger then in Variant B. In other word people are more likely to go to the partner website having Variant A. 
+Note: Only those sessions were considered where there was at least one clickout
+
+
+#### 
+Query to find out Sessions were multiple Devices were used:
+
+SELECT * FROM
+     (
+     SELECT s.session_id,
+     COUNT(DISTINCT(device_type_id)) AS COUNT_DEVICE,
+     SUM(clickout)
+     FROM fact_main
+     JOIN Sessions1 s ON s.session_id_1=fact_main.session_id_1
+     GROUP BY 1
+     ) as SUB
+WHERE SUB.COUNT_DEVICE>1
+
+
+### Query to find out the average number of clickouts in both variants A and B:
+
+SELECT SUB.variant_id, AVG(SUB.clickouts)
+FROM
+(
+  SELECT
+  session_id_1,
+  variant_id,
+  SUM(clickout) as clickouts 
+     FROM fact_main
+     WHERE clickout>0
+     GROUP BY 1,2
+) as SUB
+
+GROUP BY 1
+
+
+
+
+
+
+
 
 
 -- Wie hoch ist der Anteil der Sessions mit nur einem einzigen Seitenaufruf, ohne clickout an der Gesamtzahl der Sessions?
