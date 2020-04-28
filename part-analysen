@@ -4,15 +4,15 @@
 
 Based on the Data Set there is only one Session (keea1bqaoaek8g1e7f3rpc8rh6) from group A where 2 different devices were used: Tablet for Clickout & Pageview and Desktop for Pageview Only
 
-In this case we can not compare two groups and answere the question given.
+In this case we cannot compare two groups and answere the given question.
 
 Instead we can calculate Average  # Clickouts per Session for group A and B (regardless the device used):
 
 For Variant A AVG number of Clickouts per Session is 1,88
 For Variant B AVG NUmber of Clickouts per Session is 1,66
 
-Conclusion: The AVG number of Clickouts in Variant A is 13% bigger then in Variant B. In other word people are more likely to go to the partner website having Variant A. 
-Note: Only those sessions were considered where there was at least one clickout
+Conclusion: The AVG number of Clickouts in Variant A is 13% bigger then in Variant B. In other words, people are more likely to go to the partner website having Variant A. 
+Note: Only those sessions were considered for which there was at least one clickout
 
 
 #### 
@@ -86,7 +86,7 @@ For both Variants AVG Session Duration is 5 min 21 sec (321 sec)
 
 Conclusion: Users spend on Average 1 min 11 sec more on the website with Variant A
 
-Note: we do not consider in the calculation sessions with only one pageview since there is only one timestample (start) while we need both timestamps start + end
+Note: In the calculation we do not consider sessions with only one page view, since there is only one timestample (start) while we need both timestamps start + end
 
 ###################
 
@@ -131,7 +131,7 @@ GROUP BY 1
 -- Ist in den Abendstunden mehr auf Preis.de los als in der Mittagszeit?
 
 #####
-Yes, the highest peak of user's activity (in accordance with data set given) is between 18:00 and 18:59.
+Yes, the highest peak of user's activity (in accordance with the given data set) is between 18:00 and 18:59.
 
 The distribution of activity (events per hour) looks like following: 
 
