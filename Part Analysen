@@ -1,0 +1,91 @@
+-- Wie viele *clickouts* werden pro session_id mit den unterschiedlichen devices erzeugt? Vergleiche die Gruppen A und B.
+
+
+
+-- Wie hoch ist der Anteil der Sessions mit nur einem einzigen Seitenaufruf, ohne clickout an der Gesamtzahl der Sessions?
+###### 
+
+82,8% is the share of sessions with only one pageview
+
+########
+QUERY:
+
+SELECT COUNT(DISTINCT(SUB.session_id_1)) / (SELECT COUNT(DISTINCT(session_id_1)) FROM fact_main)  -- WE DIVIDE #SESSIONS WITH ONLY ONE PAGEVIEW THROUGH TOTAL NUMBER OF ALL SESSIONS o
+
+FROM
+
+(
+SELECT session_id_1,
+       COUNT(id) as c
+       FROM fact_main
+       WHERE clickout=0
+       GROUP BY 1) SUB   -- SUB QUERY RETURNS SESSIONS WHERE THERE WERE NO CLICKOUTS DURING the Session (clickout=0)
+WHERE  c=1               -- IN THE WHERE CONDITION WE SPECIFY THAT WE NEED ONLY SESSIONS WHERE THE NUMBER OF PAGEVIEWS=1 
+
+
+
+-- Wie lange dauert eine Session?
+##################
+
+For Variant A Average Session Duration is 5 min 57 sec (357 sec)
+For Variant B Average Session Duration is 4 min 46 sec (286 sec)  
+
+For both Variants AVG Session Duration is 5 min 21 sec (321 sec)
+
+Conclusion: Users spend on Average 1 min 11 sec more on the website with Variant A
+
+Note: we do not consider in the calculation sessions with only one pageview since there is only one timestample (start) while we need both timestamps start + end
+
+###################
+
+QUERY
+
+AVG Session Duration for both variants together:
+
+*****
+SELECT AVG(SUB.diff_in_sec)
+FROM
+(SELECT session_id_1,
+      variant_id,
+      (max(time) - min(time))  as diff_in_sec
+FROM fact_main
+JOIN Time1 on Time1.time_id=fact_main.time_id
+GROUP BY 1,2
+) as SUB
+
+where SUB.diff_in_sec>0
+*****
+
+AVG Session Duration for VARIANTS A and B:
+
+SELECT SUB.var,AVG(SUB.diff_in_sec)
+FROM
+(SELECT session_id_1,
+      Variant.variant as var,
+      (max(time) - min(time))  as diff_in_sec
+FROM fact_main
+JOIN Time1 on Time1.time_id=fact_main.time_id
+JOIN Variant on Variant.id=fact_main.variant_id
+GROUP BY 1,2
+) as SUB
+
+WHERE SUB.diff_in_sec>0
+
+GROUP BY 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- Ist in den Abendstunden mehr auf Preis.de los als in der Mittagszeit?
