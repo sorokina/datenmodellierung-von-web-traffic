@@ -2,14 +2,14 @@
 
 #####
 
-Based on the Data Set there is only one Session (keea1bqaoaek8g1e7f3rpc8rh6) from group A where 2 different devices were used: Tablet for Clickout & Pageview and Desktop for Pageview Only
+Based on the Data Set there is only one Session (keea1bqaoaek8g1e7f3rpc8rh6) from group A where 2 different devices were used: Tablet for Clickout & Pageview and Desktop for 3 Pageviews (page_type=semp).
 
-In this case we cannot compare two groups and answere the given question.
+In this case we cannot compare two groups and answer the given question.
 
 Instead we can calculate Average  # Clickouts per Session for group A and B (regardless the device used):
 
-For Variant A AVG number of Clickouts per Session is 1,88
-For Variant B AVG NUmber of Clickouts per Session is 1,66
+For Variant A AVG number of Clickouts per Session is 1.88
+For Variant B AVG NUmber of Clickouts per Session is 1.66
 
 Conclusion: The AVG number of Clickouts in Variant A is 13% bigger then in Variant B. In other words, people are more likely to go to the partner website having Variant A. 
 Note: Only those sessions were considered for which there was at least one clickout
@@ -45,13 +45,6 @@ FROM
 ) as SUB
 
 GROUP BY 1
-
-
-
-
-
-
-
 
 
 -- Wie hoch ist der Anteil der Sessions mit nur einem einzigen Seitenaufruf, ohne clickout an der Gesamtzahl der Sessions?
@@ -135,7 +128,7 @@ Yes, the highest peak of user's activity (in accordance with the given data set)
 
 The distribution of activity (events per hour) looks like following: 
 
-hour   #events
+hour #events
 11	455
 12	446
 13	563
