@@ -28,52 +28,146 @@ print(df)
 
 
 -- TASK 2: Datenmodellierung: Erstelle Tabellen in SQL (postgres, mysql, mariadb) im Sternschema als Fakten- und Dimensionstabelle. Befülle sie, um damit die untenstehenden Fragen mit SQL zu beantworten.
--- Tables are created in MYSQL
 
--- dimension table Sessions
+-- df - data frame from the task 1 (output)
 
-CREATE TABLE `Sessions` (
-  `session_id_1` int PRIMARY KEY AUTO_INCREMENT,
-  `session_id` varchar(254)
-);
+data=df 
 
--- dimension table Sessions
-CREATE TABLE `Time` (
-  `time_id` int PRIMARY KEY AUTO_INCREMENT ,
-  `time` timestamp
-);
+— rename column "user_agent" into "type" 
 
--- dimension table Variant
+data.rename(columns={"user_agent": "type"})
 
-CREATE TABLE `Variant` (
-  `id` boolean PRIMARY KEY,
-  `variant` varchar(10)
-);
+--   In the column "page_type" substitute "semp" with 0, "clickout" with 1 for the future FACT table 
 
--- dimension table Device_Type
+data["page_type"].replace({"semp": 0, "clickout": 1})
 
-CREATE TABLE `Device_Type` (
-  `id` int PRIMARY KEY,
-  `type` varchar(254)
-);
 
--- fact table fact_main: as fact we take #clickouts in the column  `clickout`: 
--- the value in each row assigned to 1 if it is 'clickout' in original data set and to 0 if page type was 'semp'
+— From Every Column in Data Frame (data) create a series of unique entries and convert them into Data Frame
+-- so that we can pass them in the MySQL Data Base tables late
 
-CREATE TABLE `fact_main` (
-  `clickout` int,
-  `session_id_1` int,
-  `time_id` int,
-  `variant_id` boolean,
-  `device_type_id` int
-  `id` int PRIMARY KEY AUTO_INCREMENT 
-);
+timestamp=data.timestamp.unique()
+timestamp = pd.DataFrame(timestamp, columns=["timestamp"])
 
-ALTER TABLE `fact_main` ADD FOREIGN KEY (`session_id_1`) REFERENCES `Sessions` (`session_id_1`);
+variant=data.variant.unique()
+variant = pd.DataFrame(variant, columns=["variant"])
 
-ALTER TABLE `fact_main` ADD FOREIGN KEY (`time_id`) REFERENCES `Time` (`time_id`);
+device_type=data.type.unique()
+device_type = pd.DataFrame(type, columns=["type"] )
 
-ALTER TABLE `fact_main` ADD FOREIGN KEY (`variant_id`) REFERENCES `Variant` (`id`);
+sessions=data.sessions.unique()
+sessions = pandas.DataFrame(sessions,columns=["session_id"])
 
-ALTER TABLE `fact_main` ADD FOREIGN KEY (`device_type_id`) REFERENCES `Device_Type` (`id`);
+
+— CREATION OF DIMENSION & FACT TABLES in MySQL DB
+
+import sqlalchemy
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
+
+database_username = 'root'
+database_password = 'XXXXX'
+database_ip       = 'YYYYY'
+database_name     = 'test'
+db_connection = sqlalchemy.create_engine('mysql+mysqlconnector://{0}:{1}@{2}/{3}'.
+                                               format(database_username, database_password, 
+                                                      database_ip, database_name))
+
+meta = MetaData()
+### Session Table
+Sessions = Table(
+   'Sessions', meta, 
+   Column('id', Integer, primary_key = True,  autoincrement=True), 
+   Column('session_id_1', String, 
+)
+meta.create_all(db_connection)
+
+### Time Table
+meta = MetaData()
+Time=Table(
+   'Time', meta, 
+   Column('time_id', Integer, primary_key = True,  autoincrement=True), 
+   Column('time', Integer, 
+)
+meta.create_all(db_connection)
+
+### Variant Table
+meta = MetaData()
+Variant=Table(
+   'Variant', meta, 
+   Column('varian_id', Integer, primary_key = True,  autoincrement=True), 
+   Column('variant', String, 
+)
+meta.create_all(db_connection)
+
+### Device Type
+meta = MetaData()
+Device_Type=Table(
+   'Device_Type', meta, 
+   Column('id', Integer, primary_key = True,  autoincrement=True), 
+   Column('type', String, 
+)
+meta.create_all(db_connection)
+
+#### Creation Fact Table: Fact_Main
+
+meta = MetaData()
+fact_main=Table(
+   'fact_main', meta, 
+   Column('id', Integer, primary_key = True,  autoincrement=True), 
+   Column('clickout', Integer),
+   Column('session_id_1', Integer),
+   Column ('time_id',Integer),
+   Column ('variant_id', Integer),
+   Column ('device_type_id', Integer)
+meta.create_all(db_connection)
+
+
+
+
+— INSERTING DATA INTO 4 DIMENSION TABLES
+
+
+sessions.to_sql(con=db_connection, name='Sessions', if_exists='append')
+timestamp.to_sql(con=db_connection, name='Time', if_exists='append')
+variant.to_sql(con=db_connection, name='Variant', if_exists='append')
+device_type.to_sql(con=db_connection, name='Device_Type', if_exists='append')
+
+
+
+— READ DATA FROM MYSQL to use it for merge:
+
+sessions_df=pd.read_sql_table("Sessions", db_connection, columns=["sessions_id_1", "session_id"])
+
+time_df=pd.read_sql_table("Time",db_connection, columns=["time_id", "time"])
+
+time_df.rename(columns={"time": "timestamp"})
+
+device_type_df=pd.read_sql_table("Device_Type",db_connection, columns=["id", "type"])
+
+variant_df=pd.read_sql_table("Variant",db_connection, columns=["id", "variant"])
+
+—  USE DFs that we have just imported into MERGE with our initial output data ( data frame with device type we got after part 1 of the current exercise)
+-- data = Data Frame output from part 1 of current exercise
+
+df1 = data.merge(sessions_df, how='left',on='session_id')
+
+-- merge with time
+
+df2 = df1.merge(time_df, how='left',on='timestamp') 
+
+-- merge with device_type
+
+df3= df2.merge(device_type_df, how='left', on='type')
+
+-- merge with variant
+
+df4=df3.merge(variant_df, how='left', on ='variant')
+
+-- specify those columns from the final df4 that we will push in the fact_main table
+
+
+df_fact=df4[['clickout','sessions_id_1','time_id','variant_id','device_type_id']]
+
+— INSERT df_fact into MySQL Table Fact_Main
+
+df_fact.to_sql(con=db_connection, name='fact_main', if_exists='append')
 
